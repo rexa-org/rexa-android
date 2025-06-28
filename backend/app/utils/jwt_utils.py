@@ -1,30 +1,41 @@
 import jwt
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Optional, Dict, Any
 from ..config import settings
 
-ALGORITHM = "HS256"
-
-
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
+    """Create a JWT access token"""
     to_encode = data.copy()
-    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=15))
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, settings.JWT_SECRET, algorithm=ALGORITHM)
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=30)
+    to_encode.update({"exp": expire, "type": "access"})
+    encoded_jwt = jwt.encode(to_encode, settings.JWT_SECRET, algorithm="HS256")
     return encoded_jwt
 
-def create_refresh_token(data: dict, expires_delta: Optional[timedelta] = None):
+def create_refresh_token(data: Dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
+    """Create a JWT refresh token"""
     to_encode = data.copy()
-    expire = datetime.utcnow() + (expires_delta or timedelta(days=7))
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, settings.JWT_SECRET, algorithm=ALGORITHM)
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(days=7)
+    to_encode.update({"exp": expire, "type": "refresh"})
+    encoded_jwt = jwt.encode(to_encode, settings.JWT_SECRET, algorithm="HS256")
     return encoded_jwt
 
-def decode_token(token: str):
+def decode_token(token: str) -> Optional[Dict[str, Any]]:
+    """Decode and validate a JWT token"""
     try:
-        payload = jwt.decode(token, settings.JWT_SECRET, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, settings.JWT_SECRET, algorithms=["HS256"])
         return payload
-    except jwt.ExpiredSignatureError:
-        return None
     except jwt.PyJWTError:
+        return None
+
+def get_current_user(token: str) -> Optional[Dict[str, Any]]:
+    """Get current user from token"""
+    payload = decode_token(token)
+    if payload and payload.get("type") == "access":
+        return payload
         return None

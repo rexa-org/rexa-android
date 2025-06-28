@@ -1,15 +1,21 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.middleware.httpsredirect import HTTPSRedirectMiddleware
 from .config import settings
 from .routes import auth, users, rewards, marketplace, wallet, payments, admin
 
-app = FastAPI(title="reX API", version="0.1.0")
+app = FastAPI(
+    title="reX API", 
+    version="0.1.0",
+    description="Reward Exchange API - Consolidate, exchange, and monetize digital rewards"
+)
 
+# CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -29,4 +35,15 @@ app.include_router(admin.router, prefix="/admin", tags=["admin"])
 
 @app.get("/")
 def root():
-    return {"message": "Welcome to reX API"}
+    return {"message": "Welcome to reX API", "version": "0.1.0"}
+
+@app.get("/health")
+def health_check():
+    return {"status": "healthy", "service": "reX API"}
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request, exc):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail}
+    )
