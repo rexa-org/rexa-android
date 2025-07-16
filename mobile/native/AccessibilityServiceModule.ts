@@ -1,5 +1,11 @@
 // Native Android accessibility service stub
-export default {
-  start: () => Promise.resolve('Accessibility service started'),
-  stop: () => Promise.resolve('Accessibility service stopped'),
-}; 
+const AccessibilityService = {
+  start(): Promise<string> {
+    return Promise.resolve('Accessibility service started');
+  },
+  stop(): Promise<string> {
+    return Promise.resolve('Accessibility service stopped');
+  },
+};
+
+export default AccessibilityService;
