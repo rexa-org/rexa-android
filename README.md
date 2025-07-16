@@ -18,7 +18,6 @@ A modern platform to consolidate, exchange, and monetize digital rewards (cashba
 - [Deployment](#deployment)
 
 ---
-
 ## Project Overview
 reX lets users scan, manage, exchange, and sell digital rewards from multiple apps, with privacy-first scraping and a global marketplace. Admins can moderate listings and view commission reports.
 
